@@ -51,29 +51,34 @@ epilepsy = input("Do you have photosensitive epilepsy?\n(y/n) >>> ").lower()
 # if they do, show src
 if epilepsy == "y":
     cv2.imshow("Porygon", src)
+    # show above terminal
+    cv2.setWindowProperty("Porygon", cv2.WND_PROP_TOPMOST, 1)
+
+    # hide img after keypresses
+    cv2.waitKey(0)
 
 # if they don't, load and show flashing imgs
 elif epilepsy == "n":
 
-	# get filtered imgs
-	f_imgs = [] # put imgs bere
+    # get filtered imgs
+    f_imgs = [] # put imgs bere
 
-	for i in range(3):
-	    # channels to pass to filter_colours
-    	channels = [0,0,0]
-    	# set the index to filter
-    	channels[i] = 1
+    for i in range(3):
+        # channels to pass to filter_colours
+        channels = [0,0,0]
+        # set the index to filter
+        channels[i] = 1
 
     	# filter only wanted colour channels from src
     	# and append to filtered imgs
-    	f_imgs.append(filter_colours(src, channels))
+        f_imgs.append(filter_colours(src, channels))
     
     # ask usr what speed they want to flash at
-	speed = input("Do you want to have fast (0.1s) or slow (0.5s) flashing?\n(f/s) >>> ")
+    speed = input("Do you want to have fast (0.1s) or slow (0.5s) flashing?\n(f/s) >>> ")
     
     # set delay time
     if speed == "f":
-        delay = 100
+        delay = 50
     elif speed == "s":
         delay = 500
     else:
@@ -87,6 +92,8 @@ elif epilepsy == "n":
         for f_img in f_imgs:
             # show img in same window
             cv2.imshow("Filtered Porygon", f_img)
+            # show in front of terminal
+            cv2.setWindowProperty("Filtered Porygon", cv2.WND_PROP_TOPMOST, 1)
             # delay between imgs
             cv2.waitKey(delay)
                 
