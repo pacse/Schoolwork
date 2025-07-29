@@ -1,23 +1,40 @@
+# imports
 import cv2
 import numpy as np
 from pathlib import Path
 
+# === paths ===
+
+# path to imgs folder
+imgs_path = Path(__file__).parent.absolute() / "imgs"
+# path to src
+src_path = imgs_path / "porygon.jfif"
+
+# === useful funcs ===
+
 def init_img(size: tuple):
+    '''
+    initializes a np array with 
+    the dimensions provided
+    '''
     return np.zeros(size, dtype = np.uint8) # ensure the zeros is one byte long
 
-def filter_colour(src: cv2.typing.MatLike, **kwargs) -> cv2.typing.MatLike:
+
+def filter_colours(src: cv2.typing.MatLike, **kwargs) -> cv2.typing.MatLike:
     '''
     Creates an image with the colour channels specified\n
-    params:\n
     src: the image to filter\n
-    colour: The colour to make the filtered image (lowercase)
+    kwargs:\n
+    colour: The colour to make the filtered image (lowercase)\n
+    channels: a list of the colour channels to include (eg [1,0,0] for blue)
     '''
+
     _VALID_COLOURS = ["grey", "red", "green", "blue", "purple", "yellow"]
 
     # init blank img of src shape
     img = init_img(src.shape)
 
-    # handle colour channel filters
+    # handle word filters
     if "colour" in kwargs:
         if kwargs["colour"] == "grey":
             img = cv2.cvtColor(src, cv2.COLOR_BGR2GRAY)
@@ -47,6 +64,7 @@ def filter_colour(src: cv2.typing.MatLike, **kwargs) -> cv2.typing.MatLike:
         else:
             raise ValueError(f"Invalid colour: {kwargs['colour']}\nValid colours: {_VALID_COLOURS}")
     
+    # handle list filters 
     elif "channels" in kwargs:
         # check kwarg is valid
                 # channels is a list
@@ -55,6 +73,8 @@ def filter_colour(src: cv2.typing.MatLike, **kwargs) -> cv2.typing.MatLike:
                 any(isinstance(channel, int) for channel in kwargs["channels"]) or 
                 # only 3 channels
                 len(kwargs["channels"]) != 3):
+            
+            # give ValueError if problem
             raise ValueError("Expected channels kwarg to be type list[int] of length 3")
         
         # add filtered channels to img
@@ -62,48 +82,24 @@ def filter_colour(src: cv2.typing.MatLike, **kwargs) -> cv2.typing.MatLike:
             if channel == 1:
                 img[:,:,i] = src[:,:,i]
 
-    # return
+    # return img
     return img
-    
 
-# paths
-imgs_path = Path(__file__).parent.absolute()
-img_path = imgs_path / "imgs" / "git.jpg"
 
-# image to play with
-src = cv2.imread(str(img_path))
+# === main logic ===
 
-# sneaky resize
-s = src.shape
-resized = (s[1]//2, s[0]//2)
-src = cv2.resize(src, resized)
+# load src
+src = cv2.imread(str(src_path))
 
-_VALID_COLOURS = ["grey", "red", "green", "blue", "purple", "yellow"]
+# get filtered imgs
+filtered_imgs = [] # put imgs bere
 
-cv2.imshow("Original", src)
+for i in range(3):
+    # channels to pass to filter_colours
+    channels = [0,0,0]
+    # set the index to filter
+    channels[i] = 1
 
-while True:
-    key = chr(cv2.waitKey(0))
-
-    if key == "q":
-        break
-
-    elif key == "d": # dull
-        img = filter_colour(src, colour="grey")
-    elif key == "r":
-        img = filter_colour(src, channels=[0,0,1])
-    elif key == "g":
-        img = filter_colour(src, colour="green")
-    elif key == "b":
-        img = filter_colour(src, colour="blue")
-    elif key == "p":
-        img = filter_colour(src, colour="purple")
-    elif key == "y":
-        img = filter_colour(src, colour="yellow")
-    else:
-        print(f"INVALID KEY: {key!r}")
-        continue
-    
-    cv2.imshow("Filtered", img)
-
-cv2.destroyAllWindows()
+    # filter the img by only important colour channels
+    # and append to filtered imgs
+    filtered_imgs.append(filter_colours(src, channels=channels))
