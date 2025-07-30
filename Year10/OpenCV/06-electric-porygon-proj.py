@@ -2,7 +2,6 @@
 import cv2
 import numpy as np
 from pathlib import Path
-from sys import exit
 
 # === paths ===
 
@@ -23,9 +22,14 @@ def init_img(size: tuple):
 
 def filter_colours(src: cv2.typing.MatLike, channels: list[int]) -> cv2.typing.MatLike:
     '''
-    Creates an image with the colour channels specified\n
-    src: the image to filter\n
-    channels: a list of the colour channels to include (eg [1,0,0] for blue)
+    Filters only selected colour channels from src
+    
+    Args:
+        src: the image to filter
+        channels: a list of the colour channels to include (eg [1,0,0] for blue)
+    
+    Returns:
+        The filtered image
     '''
 
     # init blank img of src shape
@@ -45,11 +49,15 @@ def filter_colours(src: cv2.typing.MatLike, channels: list[int]) -> cv2.typing.M
 # load src
 src = cv2.imread(str(src_path))
 
+# ✨Sanity check✨
+if not src:
+    raise ValueError("Could not load source img")
+
 # ask usr if they have photosensitive epilepsy
 epilepsy = input("Do you have photosensitive epilepsy?\n(y/n) >>> ").lower()
 
-# if they do, show src
 if epilepsy == "y":
+    # if they do, show src
     cv2.imshow("Porygon", src)
     # show above terminal
     cv2.setWindowProperty("Porygon", cv2.WND_PROP_TOPMOST, 1)
@@ -61,36 +69,38 @@ if epilepsy == "y":
 elif epilepsy == "n":
 
     # get filtered imgs
-    f_imgs = [] # put imgs bere
+
+    filtered_imgs: list[cv2.typing.MatLike] = []
 
     for i in range(3):
         # channels to pass to filter_colours
         channels = [0,0,0]
+
         # set the index to filter
         channels[i] = 1
 
     	# filter only wanted colour channels from src
     	# and append to filtered imgs
-        f_imgs.append(filter_colours(src, channels))
+        filtered_imgs.append(filter_colours(src, channels))
     
     # ask usr what speed they want to flash at
     speed = input("Do you want to have fast (0.1s) or slow (0.5s) flashing?\n(f/s) >>> ")
     
     # set delay time
-    if speed == "f":
+    if speed == "f": # fast flash
         delay = 50
-    elif speed == "s":
+    elif speed == "s": # slow flash
         delay = 500
+
     else:
         # cry
-        print("Just leave me alone :(")
-        exit(1)
+        raise ValueError("Just leave me alone :(")
         
     # show all colours 10 times
     for _ in range(10):
-        # show each img we've filtered
-        for f_img in f_imgs:
-            # show img in same window
+        
+        for f_img in filtered_imgs:
+            # show f_img in one changing window
             cv2.imshow("Filtered Porygon", f_img)
             # show in front of terminal
             cv2.setWindowProperty("Filtered Porygon", cv2.WND_PROP_TOPMOST, 1)
@@ -99,6 +109,9 @@ elif epilepsy == "n":
                 
 else:
     # more crying
-    print("Come on, I couldn't have made it easier for you :(")
-    
+    raise ValueError("Come on, I couldn't have made it easier for you :(")
+
+# cleanup
 cv2.destroyAllWindows()
+
+# ╰(*°▽°*)╯ The program worked! ╰(*°▽°*)╯
