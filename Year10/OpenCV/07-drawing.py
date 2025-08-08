@@ -26,4 +26,3 @@ img[150:175, 100:225] = 255
 cv5.imshow("display", img)
 
 cv5.waitKey(0)
-
